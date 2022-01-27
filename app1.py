@@ -46,8 +46,8 @@ def holdersEvent(_fromBlock, _toBlock,contract,address):
 
 def main():
     #itterating from block zero to latest
-    #using trasaction of one block
-    #from multiple trsaction of that block choose the trsaction where contract address is not null
+    #using transaction of one block
+    #from multiple transaction of that block choose the transaction where contract address is not null
     #use that contract address to check if it is erc20
     
     latestBlock = web3.eth.get_block('latest').number
