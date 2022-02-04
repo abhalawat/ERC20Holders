@@ -15,8 +15,6 @@ def erc20(block,address):
     infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
     web3 = Web3(Web3.WebsocketProvider(infura_url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-    abi = json.load(open('erc20abi.json','r'))
-    contract = web3.eth.contract(address=address,abi=abi)
     latest = web3.eth.blockNumber
     firstBlock = block
     totalResult = latest - firstBlock
@@ -25,18 +23,24 @@ def erc20(block,address):
         while totalResult>=2000:
             fromBlock = initial
             toBlock = initial +2000
-            holdersProcess.append(holdersEvent.remote(fromBlock,toBlock,contract,address))
+            #holdersProcess.append(holdersEvent.remote(fromBlock,toBlock,address))
+            print(fromBlock,toBlock,address)
+            details.append([fromBlock,toBlock,address])
             totalResult = totalResult -2000
             initial = toBlock
         if totalResult != 0:
             fromBlock = initial
             toBlock = initial + totalResult
-            holdersProcess.append(holdersEvent.remote(fromBlock,toBlock,contract,address))
+            details.append([fromBlock,toBlock,address])
+            print(fromBlock,toBlock,address)
+            # holdersProcess.append(holdersEvent.remote(fromBlock,toBlock,address))
     else:
-        holdersProcess.append(holdersEvent.remote(firstBlock,latest,contract,address))
+        details.append([firstBlock,latest,address])
+        print(firstBlock,latest,address)
+        #holdersProcess.append(holdersEvent.remote(firstBlock,latest,address))
 
 @ray.remote
-def holdersEvent(_fromBlock, _toBlock,contract,address):
+def holdersEvent(_fromBlock, _toBlock,address):
     infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
     web3 = Web3(Web3.WebsocketProvider(infura_url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -65,14 +69,16 @@ if __name__=="__main__":
     print(len(block_addreslist))
     erc20Process = []
     holdersProcess = []
+    details = []
     #inspect_serializability(holdersEvent, name="holdersEvent")
     for i in range(len(block_addreslist)):
         block = int(block_addreslist[i][blockIndex])
         address = block_addreslist[i][addressIndex]
         erc20Process.append(erc20.remote(block,address))
     
-    erc20Process = ray.put(erc20Process)
+    #erc20Process = ray.put(erc20Process)
     print(ray.get(erc20Process))
-    holdersProcess = ray.put(holdersProcess)
-    print(ray.get(holdersProcess))
+    # holdersProcess = ray.put(holdersProcess)
+    # print(ray.get(holdersProcess))
+    print(details)
 
