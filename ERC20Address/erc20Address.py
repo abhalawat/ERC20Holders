@@ -39,25 +39,7 @@ def erc20(block,address):
         print(firstBlock,latest,address)
         #holdersProcess.append(holdersEvent.remote(firstBlock,latest,address))
 
-@ray.remote
-def holdersEvent(_fromBlock, _toBlock,address):
-    infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
-    web3 = Web3(Web3.WebsocketProvider(infura_url))
-    web3.middleware_onion.inject(geth_poa_middleware, layer=0)
-    abi = json.load(open('erc20abi.json','r'))
-    contract = web3.eth.contract(address=address,abi=abi)
-    try:
-        transferEvents = contract.events.Transfer.createFilter(fromBlock=_fromBlock, toBlock=_toBlock)
-        try:  
-            for i in range(len(transferEvents.get_all_entries())):
-                print(transferEvents.get_all_entries()[i].args.value)
-                addressTo = transferEvents.get_all_entries()[i].args.to
-                print(addressTo)
-                #collection.insert_one({"Contractaddress":address,"holderAddress": addressTo})
-        except eth_abi.exceptions.InsufficientDataBytes:
-            pass           
-    except asyncio.TimeoutError: 
-        pass
+
     
 if __name__=="__main__":
     with open('data.json') as f:
@@ -78,7 +60,5 @@ if __name__=="__main__":
     
     #erc20Process = ray.put(erc20Process)
     print(ray.get(erc20Process))
-    # holdersProcess = ray.put(holdersProcess)
-    # print(ray.get(holdersProcess))
-    print(details)
+    
 
