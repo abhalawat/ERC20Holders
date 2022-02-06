@@ -8,7 +8,7 @@ from ray.util import inspect_serializability
 ray.init()
 
 def mongo(contractAddress, block):
-    connection_url = 'mongodb+srv://abhalawat:1234@cluster0.4bkwk.mongodb.net/Holders?retryWrites=true&w=majority'
+    connection_url = 'mongodb+srv://abhalawat:1234@cluster0.hnxq5.mongodb.net/Holders?retryWrites=true&w=majority'
     client = pymongo.MongoClient(connection_url)
     Database = client.get_database('Holders')
     Block_Address = Database.Block_Address
