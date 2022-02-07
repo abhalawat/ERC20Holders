@@ -42,23 +42,16 @@ def erc20(block,address):
         while totalResult>=2000:
             fromBlock = initial
             toBlock = initial +2000
-            #holdersProcess.append(holdersEvent.remote(fromBlock,toBlock,address))
-            #print(fromBlock,toBlock,address)
-            #details.append([fromBlock,toBlock,address])
             mongo(address, fromBlock, toBlock)
             totalResult = totalResult -2000
             initial = toBlock
         if totalResult != 0:
             fromBlock = initial
             toBlock = initial + totalResult
-            #details.append([fromBlock,toBlock,address])
-            #print(fromBlock,toBlock,address)
-            # holdersProcess.append(holdersEvent.remote(fromBlock,toBlock,address))
             mongo(address, fromBlock, toBlock)
     else:
         mongo(address, firstBlock, latest)
-        #print(firstBlock,latest,address)
-        #holdersProcess.append(holdersEvent.remote(firstBlock,latest,address))
+        
 
 
     

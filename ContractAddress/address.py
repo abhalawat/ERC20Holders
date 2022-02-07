@@ -37,8 +37,6 @@ def contract(_block):
         address = web3.eth.getTransactionReceipt(tx_hash).contractAddress
         print("address ",address," txHash ",tx_hash)
         if address != None:
-            #collection.insert_one({"Contractaddress":address,"Block": _block})
-            #Block_Address[_block] = address
             mongo(address, _block)
             return address
 
