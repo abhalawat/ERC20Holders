@@ -5,10 +5,29 @@ import ray
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from ray.util import inspect_serializability
+import pymongo
+
 
 infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
 web3 = Web3(Web3.WebsocketProvider(infura_url))
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+
+connection_url = 'mongodb+srv://abhalawat:1234@cluster0.hnxq5.mongodb.net/Holders?retryWrites=true&w=majority'
+client = pymongo.MongoClient(connection_url)
+Database = client.get_database('Holders')
+
+def mongo(address, fromBlock, toBlock):
+    connection_url = 'mongodb+srv://abhalawat:1234@cluster0.hnxq5.mongodb.net/Holders?retryWrites=true&w=majority'
+    client = pymongo.MongoClient(connection_url)
+    Database = client.get_database('Holders')
+    fromToDetails = Database.fromToDetails
+    queryObject = {
+                'from':fromBlock,
+                'to': toBlock,
+                'contractAddress': address
+            }
+    print(address, fromBlock,toBlock)
+    fromToDetails.insert_one(queryObject)
 
 @ray.remote
 def erc20(block,address):
@@ -24,41 +43,40 @@ def erc20(block,address):
             fromBlock = initial
             toBlock = initial +2000
             #holdersProcess.append(holdersEvent.remote(fromBlock,toBlock,address))
-            print(fromBlock,toBlock,address)
-            details.append([fromBlock,toBlock,address])
+            #print(fromBlock,toBlock,address)
+            #details.append([fromBlock,toBlock,address])
+            mongo(address, fromBlock, toBlock)
             totalResult = totalResult -2000
             initial = toBlock
         if totalResult != 0:
             fromBlock = initial
             toBlock = initial + totalResult
-            details.append([fromBlock,toBlock,address])
-            print(fromBlock,toBlock,address)
+            #details.append([fromBlock,toBlock,address])
+            #print(fromBlock,toBlock,address)
             # holdersProcess.append(holdersEvent.remote(fromBlock,toBlock,address))
+            mongo(address, fromBlock, toBlock)
     else:
-        details.append([firstBlock,latest,address])
-        print(firstBlock,latest,address)
+        mongo(address, firstBlock, latest)
+        #print(firstBlock,latest,address)
         #holdersProcess.append(holdersEvent.remote(firstBlock,latest,address))
 
 
     
 if __name__=="__main__":
-    with open('data.json') as f:
-        block_addres = json.load(f)
-
-    block_addreslist = list(block_addres.items())
-    blockIndex = 0
-    addressIndex = 1
-    print(len(block_addreslist))
     erc20Process = []
-    holdersProcess = []
-    details = []
+    Database = client.get_database('Holders')
+    Block_Address = Database.Block_Address
+    query = Block_Address.find()
+    output={}
+    i=0
+    details =[]
+    for x in query:
+        details.append(x)
+    #print(type(details[1]['Block']))
+    for l in details:
+        erc20Process.append(erc20.remote(l['Block'], l['contractAddress']))
+    ray.get(erc20Process)
     #inspect_serializability(holdersEvent, name="holdersEvent")
-    for i in range(len(block_addreslist)):
-        block = int(block_addreslist[i][blockIndex])
-        address = block_addreslist[i][addressIndex]
-        erc20Process.append(erc20.remote(block,address))
-    
-    #erc20Process = ray.put(erc20Process)
-    print(ray.get(erc20Process))
+
     
 

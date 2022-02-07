@@ -5,12 +5,26 @@ import ray
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 from ray.util import inspect_serializability
+import pymongo
 
 infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
 web3 = Web3(Web3.WebsocketProvider(infura_url))
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
+connection_url = 'mongodb+srv://abhalawat:1234@cluster0.hnxq5.mongodb.net/Holders?retryWrites=true&w=majority'
+client = pymongo.MongoClient(connection_url)
+Database = client.get_database('Holders')
 
+def mongo(addressTo):
+    connection_url = 'mongodb+srv://abhalawat:1234@cluster0.hnxq5.mongodb.net/Holders?retryWrites=true&w=majority'
+    client = pymongo.MongoClient(connection_url)
+    Database = client.get_database('Holders')
+    holders = Database.holders
+    queryObject = {
+                'addressTo':addressTo,
+                }
+    print(addressTo)
+    holders.insert_one(queryObject)
 
 @ray.remote
 def holdersEvent(_fromBlock, _toBlock,address):
@@ -25,28 +39,27 @@ def holdersEvent(_fromBlock, _toBlock,address):
             for i in range(len(transferEvents.get_all_entries())):
                 print(transferEvents.get_all_entries()[i].args.value)
                 addressTo = transferEvents.get_all_entries()[i].args.to
-                print(addressTo)
+                #print(addressTo)
+                mongo(addressTo)
         except eth_abi.exceptions.InsufficientDataBytes:
             pass           
     except asyncio.TimeoutError: 
         pass
     
 if __name__=="__main__":
-    with open('blocks_address.json') as f:
-        blocks_address = json.load(f)
-
-    
-    fromBlock = 0
-    toBlock = 1
-    address = 2
-    
     holdersProcess = []
+    Database = client.get_database('Holders')
+    fromToDetails = Database.fromToDetails
+    query = fromToDetails.find()
+    output={}
+    i=0
+    details =[]
+    for x in query:
+        details.append(x)
     #inspect_serializability(holdersEvent, name="holdersEvent")
-    for i in range(len(blocks_address)):
-        fblock = int(blocks_address[i][fromBlock])
-        toblock = blocks_address[i][toBlock]
-        address = blocks_address[i][address]
-        holdersProcess.append(holdersEvent.remote(fblock,toblock,address))
+    for l in details:
+        #_fromBlock, _toBlock,address
+        holdersProcess.append(holdersEvent.remote(l['from'], l['to'],l['contractAddress']))
     
     #erc20Process = ray.put(erc20Process)
     print(ray.get(holdersProcess))
