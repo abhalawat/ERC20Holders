@@ -1,4 +1,3 @@
-import json
 from web3 import Web3
 from web3.middleware import geth_poa_middleware
 import pymongo
@@ -38,7 +37,12 @@ def contract(_block):
 
 if __name__=="__main__":
     #inspect_serializability(contract, name="contract")
-    ray.init()
+    #ray.init()ray.init(log_to_driver=False)
+    ray.init(address='auto', _redis_password='5241590000000000',log_to_driver=False)
+    print('''This cluster consists of
+    {} nodes in total
+    {} CPU resources in total
+    '''.format(len(ray.nodes()), ray.cluster_resources()['CPU']))
     infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
     web3 = Web3(Web3.WebsocketProvider(infura_url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
@@ -46,4 +50,3 @@ if __name__=="__main__":
     futures = [contract.remote(block) for block in reversed(range(latestBlock))]
     futures_id = ray.put(futures)
     print(ray.get(futures))
-
