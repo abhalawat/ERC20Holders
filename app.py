@@ -38,7 +38,9 @@ def contract(_block):
 if __name__=="__main__":
     #inspect_serializability(contract, name="contract")
     #ray.init()ray.init(log_to_driver=False)
-    ray.init(address='auto', _redis_password='5241590000000000',log_to_driver=False)
+    #ray.init(address='auto', _redis_password='5241590000000000',log_to_driver=False)
+    ray.init(address='auto', _redis_password='5241590000000000')
+    #ray.init(address='ray://192.168.1.220:10001')
     print('''This cluster consists of
     {} nodes in total
     {} CPU resources in total

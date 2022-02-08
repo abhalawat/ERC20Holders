@@ -2,7 +2,7 @@ version: '3'
 services:
     blocks_Container:
       build: /home/deq/ERC20_token/
-      image: "dockercompose/block:1.0"
+      image: "block:1.0"
       container_name: "blocks_container1"
       ports: 
         - 9229:9229
@@ -11,10 +11,9 @@ services:
       build:
         context: /home/deq/ERC20_token/
         dockerfile: "Dockerfile1"
-      image: "dockercompose/client:2.0"
+      image: "client:2.0"
       container_name: "multi1_Container"
-      depends_on:
-       - blocks_Container
+      command: tail -F anything
       ports:
         - 8000:8000
       
@@ -23,10 +22,9 @@ services:
       build:
         context: /home/deq/ERC20_token/
         dockerfile: "Dockerfile1"
-      image: "dockercompose/client:2.0"
+      image: "client:2.0"
       container_name: "multi2_Container"
-      depends_on:
-       - blocks_Container
+      command: tail -F anything
       ports:
         - 5678:5678
       
