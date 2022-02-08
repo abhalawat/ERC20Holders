@@ -13,6 +13,8 @@ services:
         dockerfile: "Dockerfile1"
       image: "dockercompose/client:2.0"
       container_name: "multi1_Container"
+      depends_on:
+       - blocks_Container
       ports:
         - 8000:8000
       
@@ -23,6 +25,8 @@ services:
         dockerfile: "Dockerfile1"
       image: "dockercompose/client:2.0"
       container_name: "multi2_Container"
+      depends_on:
+       - blocks_Container
       ports:
         - 5678:5678
       
