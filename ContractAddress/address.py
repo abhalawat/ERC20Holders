@@ -24,6 +24,7 @@ def mongo(contractAddress, block):
 
 @ray.remote
 def contract(_block):
+    infura_url= "wss://eth-mainnet.alchemyapi.io/v2/NMMzTK9vae0CA0DrxtR_TiqCHkf3qkqD"
     web3 = Web3(Web3.WebsocketProvider(infura_url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0) 
     blockDetails = web3.eth.get_block(_block)
@@ -39,7 +40,11 @@ def contract(_block):
 if __name__=="__main__":
     #inspect_serializability(contract, name="contract")
     ray.init()
-    infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
+    print('''This cluster consists of
+    {} nodes in total
+    {} CPU resources in total
+    '''.format(len(ray.nodes()), ray.cluster_resources()['CPU']))
+    infura_url= "wss://eth-mainnet.alchemyapi.io/v2/NMMzTK9vae0CA0DrxtR_TiqCHkf3qkqD"
     web3 = Web3(Web3.WebsocketProvider(infura_url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
     latestBlock = web3.eth.get_block('latest').number

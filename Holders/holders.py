@@ -23,8 +23,10 @@ def mongo(addressTo):
     queryObject = {
                 'addressTo':addressTo,
                 }
+    if holders.find_one({'addressTo': addressTo}) == None:
+        holders.insert_one(queryObject)
     print(addressTo)
-    holders.insert_one(queryObject)
+    
 
 @ray.remote
 def holdersEvent(_fromBlock, _toBlock,address):
@@ -47,6 +49,11 @@ def holdersEvent(_fromBlock, _toBlock,address):
         pass
     
 if __name__=="__main__":
+    ray.init()
+    print('''This cluster consists of
+    {} nodes in total
+    {} CPU resources in total
+    '''.format(len(ray.nodes()), ray.cluster_resources()['CPU']))
     holdersProcess = []
     Database = client.get_database('Holders')
     fromToDetails = Database.fromToDetails
