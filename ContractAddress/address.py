@@ -1,7 +1,7 @@
 from web3 import Web3
 import pymongo
 import ray
-#from ray.util import inspect_serializability
+from ray.util import inspect_serializability
 
 
 
@@ -32,7 +32,8 @@ def contract(_block):
 
 if __name__=="__main__":
     #inspect_serializability(contract, name="contract")
-    ray.init(address='auto')
+    #ray.init(address='auto')
+    ray.init()
     print('''This cluster consists of
     {} nodes in total
     {} CPU resources in total
