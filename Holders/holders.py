@@ -7,7 +7,7 @@ from web3.middleware import geth_poa_middleware
 from ray.util import inspect_serializability
 import pymongo
 
-infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
+infura_url= "wss://eth-mainnet.alchemyapi.io/v2/NMMzTK9vae0CA0DrxtR_TiqCHkf3qkqD"
 web3 = Web3(Web3.WebsocketProvider(infura_url))
 web3.middleware_onion.inject(geth_poa_middleware, layer=0)
 
@@ -30,7 +30,7 @@ def mongo(addressTo):
 
 @ray.remote
 def holdersEvent(_fromBlock, _toBlock,address):
-    infura_url= "wss://mainnet.infura.io/ws/v3/57d8e5ec16764a3e86ce18fc505e640e"
+    infura_url= "wss://eth-mainnet.alchemyapi.io/v2/NMMzTK9vae0CA0DrxtR_TiqCHkf3qkqD"
     web3 = Web3(Web3.WebsocketProvider(infura_url))
     web3.middleware_onion.inject(geth_poa_middleware, layer=0)
     abi = json.load(open('erc20abi.json','r'))
@@ -49,7 +49,7 @@ def holdersEvent(_fromBlock, _toBlock,address):
         pass
     
 if __name__=="__main__":
-    ray.init()
+    ray.init(address='auto')
     print('''This cluster consists of
     {} nodes in total
     {} CPU resources in total

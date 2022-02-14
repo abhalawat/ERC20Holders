@@ -39,7 +39,7 @@ def contract(_block):
 
 if __name__=="__main__":
     #inspect_serializability(contract, name="contract")
-    ray.init()
+    ray.init(address='auto')
     print('''This cluster consists of
     {} nodes in total
     {} CPU resources in total

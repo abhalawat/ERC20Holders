@@ -61,7 +61,7 @@ def erc20(block,address):
 
     
 if __name__=="__main__":
-    ray.init()
+    ray.init(address='auto')
     erc20Process = []
     Database = client.get_database('Holders')
     Block_Address = Database.Block_Address
