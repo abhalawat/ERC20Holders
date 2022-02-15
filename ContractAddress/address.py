@@ -2,19 +2,21 @@ from web3 import Web3
 import pymongo
 import ray
 from ray.util import inspect_serializability
+import gc
 
 
+@ray.remote
+class DataBase(object):
+  def __init__(self):
+    self.Block_Addres = pymongo.MongoClient('mongodb+srv://abhalawat:1234@cluster0.hnxq5.mongodb.net/Holders?retryWrites=true&w=majority').get_database('Holders').Block_Address
 
-def mongo(contractAddress, block):
-    # connection_url = 'mongodb+srv://abhalawat:1234@cluster0.hnxq5.mongodb.net/Holders?retryWrites=true&w=majority'
-    # client = pymongo.MongoClient(connection_url)
-    # Database = client.get_database('Holders')
-    Block_Address = pymongo.MongoClient('mongodb+srv://abhalawat:1234@cluster0.hnxq5.mongodb.net/Holders?retryWrites=true&w=majority').get_database('Holders').Block_Address
-    if Block_Address.find_one({'contractAddress': contractAddress}) == None:
-        Block_Address.insert_one({
-            'contractAddress': contractAddress,
-            'Block': block
-                })
+  def mongo(self,contractAddress, block): 
+      if self.Block_Addres.find_one({'contractAddress': contractAddress}) == None:
+          self.Block_Addres.insert_one({
+              'contractAddress': contractAddress,
+              'Block': block
+                  })
+      gc.collect()
 
 
 
@@ -27,13 +29,15 @@ def contract(_block):
         address = web3.eth.getTransactionReceipt(web3.eth.get_block(_block).transactions[i].hex()).contractAddress
         #print("address ",address," txHash ",tx_hash)
         if address != None:
-            mongo(address, _block)
+            database.mongo.remote(address, _block)
+    gc.collect()
+
             
 
 if __name__=="__main__":
     #inspect_serializability(contract, name="contract")
-    #ray.init(address='auto')
-    ray.init()
+    ray.init(address='auto')
+    #ray.init()
     print('''This cluster consists of
     {} nodes in total
     {} CPU resources in total
@@ -43,6 +47,7 @@ if __name__=="__main__":
     latestBlock = web3.eth.get_block('latest').number
     del web3
     del infura_url
+    database = DataBase.remote()
     ray.get([contract.remote(block) for block in reversed(range(latestBlock))])
     
 
